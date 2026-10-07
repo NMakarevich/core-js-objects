@@ -18,7 +18,8 @@
  *    shallowCopy({}) => {}
  */
 function shallowCopy(obj) {
-  return Object.assign({}, obj);
+  // assign
+  return { ...obj };
 }
 
 /**
@@ -389,32 +390,60 @@ function group(array, keySelector, valueSelector) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  selector: {},
+  currentKey: '',
+
+  addSelector(value) {
+    if (!this.currentKey) {
+      this.selector[value] = [];
+      this.currentKey = value;
+    } else {
+      this.selector[this.currentKey].push(value);
+    }
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    this.addSelector(value);
+    return this;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    this.addSelector(`#${value}`);
+    return this;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    this.addSelector(`.${value}`);
+    return this;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    this.addSelector(`[${value}]`);
+    return this;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    this.addSelector(`:${value}`);
+    return this;
+  },
+
+  pseudoElement(value) {
+    this.addSelector(`::${value}`);
+    return this;
   },
 
   combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+    return this;
+  },
+
+  stringify() {
+    let result = '';
+    Object.keys(this.selector).forEach((key) => {
+      result += `${key}${this.selector[key].join('')}`;
+    });
+    this.selector = {};
+    this.currentKey = '';
+    return result;
   },
 };
 
